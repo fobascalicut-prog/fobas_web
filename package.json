@@ -1,0 +1,8 @@
+{
+  "name": "fobas-website",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Fobas Group website - Vercel serverless pages + Supabase (content, auth, storage)",
+  "engines": { "node": ">=18" },
+  "scripts": { "dev": "node dev-server.js", "test": "node --check lib/site.js && node --check api/page.js" }
+}

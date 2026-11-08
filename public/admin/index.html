@@ -188,7 +188,7 @@ const TEXTAREA=new Set(['text','short','description','address','hours','message'
 const LABELS={map_url:'Google Maps link (opens directions)',points:'Key points',short:'Short description',phone:'Phone number 1',seo_title:'SEO title (shown in Google, ~60 characters)',seo_description:'SEO description (shown in Google, ~155 characters)',seo_keywords:'SEO keywords (comma separated)',faq:'Frequently asked questions',faq_eyebrow:'FAQ small heading',faq_title:'FAQ heading',question:'Question',answer:'Answer',phone2:'Phone number 2 (leave empty to hide)',whatsapp:'WhatsApp number (with country code, digits only)',whatsapp_message:'WhatsApp pre-filled message',map_embed_url:'Google Maps embed URL',map_directions_url:'Directions link',notify_email:'Send enquiries to (email)',accent_color:'Accent colour',logo_light:'Logo for dark backgrounds',logo_dark:'Logo for light backgrounds',placed_at:'Placed at',url:'Link (page or URL)',courses_page:'Courses page',placement_page:'Placement page',header_cta:'Header button',eligibility:'Eligibility',modules:'Modules / syllabus topics'};
 const HINT={title:'Tip: put *asterisks* around a word to show it in the accent colour.',whatsapp:'Example: 918606797539',map_embed_url:'In Google Maps: Share → Embed a map → copy only the src="…" link.',notify_email:'New enquiry emails go here.'};
 LABELS.recent_placements='Recently placed photos';LABELS.students_title='Recently placed section title';
-HINT.recent_placements='NOTE: these photos are controlled in the code (data/content.default.json), so changes made here are ignored by the website.';
+HINT.recent_placements='Add, replace, reorder or remove photos here, then click Save changes. Best photo size: portrait, about 1080 x 1440 px.';
 const human=k=>LABELS[k]||String(k).replace(/_/g,' ');
 const isImg=k=>/(^|_)(image|logo|photo|logo_light|logo_dark)$/.test(k)||k==='image';
 
@@ -242,16 +242,17 @@ function title(it,i){
   return f.slice(0,60);
 }
 function listField(obj,key,label){
-  const arr=obj[key];const box=el('div',{class:'list'});
+  const arr=obj[key];
+  const tch=()=>{if(key==='recent_placements')D.recent_placements_custom=true;touch()};const box=el('div',{class:'list'});
   const wrap=el('div',{class:'fld'},el('label',{},label||human(key)),HINT[key]?el('div',{class:'hint'},HINT[key]):null,box);
   const strings=!arr.length||typeof arr[0]==='string';
   const tpl=arr.length?blank(arr[0]):(key==='modules'||key==='marquee'||key.endsWith('items')?'':{});
   function draw(){
     box.innerHTML='';
     arr.forEach((it,i)=>{
-      const mv=(d)=>()=>{const j=i+d;if(j<0||j>=arr.length)return;[arr[i],arr[j]]=[arr[j],arr[i]];touch();draw()};
+      const mv=(d)=>()=>{const j=i+d;if(j<0||j>=arr.length)return;[arr[i],arr[j]]=[arr[j],arr[i]];tch();draw()};
       const tools=el('div',{class:'tools'},el('button',{class:'btn sm',type:'button',title:'Move up',onclick:e=>{e.preventDefault();mv(-1)()}},'↑'),el('button',{class:'btn sm',type:'button',title:'Move down',onclick:e=>{e.preventDefault();mv(1)()}},'↓'),
-        el('button',{class:'btn sm bad',type:'button',title:'Remove',onclick:e=>{e.preventDefault();if(confirm('Remove this item?')){arr.splice(i,1);touch();draw()}}},'✕'));
+        el('button',{class:'btn sm bad',type:'button',title:'Remove',onclick:e=>{e.preventDefault();if(confirm('Remove this item?')){arr.splice(i,1);tch();draw()}}},'✕'));
       if(typeof it==='string'){
         const inp=el('input',{type:'text'});inp.value=it;inp.oninput=()=>{arr[i]=inp.value;touch()};
         box.append(el('div',{class:'row'},el('div',{class:'fld'},inp),tools));
@@ -264,12 +265,12 @@ function listField(obj,key,label){
         d.append(el('summary',{},el('span',{class:'n'},String(i+1).padStart(2,'0')),mini,t,tools,el('span',{class:'car'},'›')));
         const ib=el('div',{class:'ib'});
         Object.keys(it).forEach(k=>ib.append(field(it,k,(key==='recent_placements'&&k==='image')?'Photo (portrait, about 1080 x 1440 px)':undefined)));
-        ib.addEventListener('input',()=>{t.textContent=title(it,i);if(typeof paintMini==='function')paintMini()});
+        ib.addEventListener('input',()=>{if(key==='recent_placements')D.recent_placements_custom=true;t.textContent=title(it,i);if(typeof paintMini==='function')paintMini()});
         d.append(ib);box.append(d);
         if(arr.length<=1)d.open=true;
       }
     });
-    box.append(el('button',{class:'btn sm add',type:'button',onclick:()=>{arr.push(typeof tpl==='object'?JSON.parse(JSON.stringify(tpl)):'');touch();draw();const last=box.querySelectorAll('details.item');if(last.length)last[last.length-1].open=true}},'+ Add item'));
+    box.append(el('button',{class:'btn sm add',type:'button',onclick:()=>{arr.push(typeof tpl==='object'?JSON.parse(JSON.stringify(tpl)):'');tch();draw();const last=box.querySelectorAll('details.item');if(last.length)last[last.length-1].open=true}},'+ Add item'));
   }
   draw();return wrap;
 }
@@ -299,6 +300,7 @@ function go(id){
   if(id==='cmt')return comments(m);
   if(id==='acct')return account(m);
   m.append(el('p',{class:'sub'},t.desc));
+  if(id==='placement')m.append(el('button',{class:'btn sm',type:'button',style:'margin:0 0 16px',onclick:()=>{if(confirm('Replace your edited photo list with the website default list?')){D.recent_placements=JSON.parse(JSON.stringify(DEFAULT.recent_placements||[]));D.recent_placements_custom=false;touch();go('placement')}}},'Reset photos to the website default list'));
   t.keys.forEach(k=>{if(D[k]===undefined)return;const f=field(D,k,human(k));m.append(f.classList&&f.classList.contains('fld')?el('div',{class:'grp'},el('div',{class:'gb'},f)):f)});
 }
 function preview(p){$('#frame').src=p+(p.includes('?')?'&':'?')+'preview='+Date.now();$('#pvName').textContent=p}
@@ -306,6 +308,8 @@ $('#pvReload').onclick=()=>preview((TABS.find(x=>x.id===cur)||{}).page||'/');
 
 /* ---------- Save ---------- */
 async function save(){
+  const keys=(D.courses||[]).map(c=>String(c.title||'').toLowerCase().replace(/[^a-z0-9]/g,''));
+  if(keys.some((k,i)=>k&&keys.indexOf(k)!==i)&&!confirm('Two courses have the same title. The website will show only the first one. Save anyway?'))return;
   const b=$('#save');b.disabled=true;b.textContent='Saving…';
   try{
     await sb('site_content?on_conflict=id',{method:'POST',body:{id:1,data:D},prefer:'resolution=merge-duplicates,return=minimal'});
@@ -381,7 +385,8 @@ async function startApp(){
   let saved={};
   try{const rows=await sb('site_content?id=eq.1&select=data');saved=(rows&&rows[0]&&rows[0].data)||{}}catch(e){toast('Could not load saved content: '+e.message,'bad')}
   D=Object.keys(saved).length?merge(DEFAULT,saved):JSON.parse(JSON.stringify(DEFAULT));
-  if(DEFAULT.recent_placements)D.recent_placements=JSON.parse(JSON.stringify(DEFAULT.recent_placements));   // the website uses the code list, so the admin shows exactly that list
+  const custom=saved.recent_placements_custom===true&&Array.isArray(saved.recent_placements);
+  D.recent_placements=JSON.parse(JSON.stringify(custom?saved.recent_placements:(DEFAULT.recent_placements||[])));D.recent_placements_custom=custom;   // the website uses the code list, so the admin shows exactly that list
   delete D.students;   // old placed-students list is no longer used; it disappears from the database on the next Save
   if(D.placement_page)delete D.placement_page.placed_label;   // the "Placed at" label belonged to the old student cards
   renderSide();go('site');

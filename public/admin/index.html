@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Fobas Admin</title>
+<link rel="icon" href="/assets/img/favicon.png">
+<style>
+:root{--bg:#0b0d16;--panel:#12151f;--panel2:#181c29;--line:#242a3b;--tx:#eef0f6;--mut:#8b93a7;--acc:#ff5b14;--acc2:#ff8a4a;--ok:#2fd08a;--bad:#ff5d5d;--r:12px}
+*{box-sizing:border-box}html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.5 Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+button,input,textarea,select{font:inherit;color:inherit}
+a{color:var(--acc2)}
+.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--panel2);padding:9px 16px;border-radius:999px;cursor:pointer;font-weight:600;transition:.2s;text-decoration:none;color:var(--tx);white-space:nowrap}
+.btn:hover{border-color:#3a4260;background:#1e2333}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:#fff}.btn.pri:hover{background:#ff7134}
+.btn.sm{padding:5px 11px;font-size:12px}.btn.bad:hover{border-color:var(--bad);color:var(--bad)}
+.btn[disabled]{opacity:.5;pointer-events:none}
+/* gate */
+.gate{min-height:100%;display:grid;place-items:center;padding:24px;background:radial-gradient(900px 500px at 70% -10%,rgba(255,91,20,.18),transparent),var(--bg)}
+.gate form{width:min(400px,100%);background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:34px;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.gate img{height:64px;width:auto;display:block;margin:0 auto 18px}
+.gate h1{font-size:20px;margin:0 0 4px;text-align:center}.gate p{color:var(--mut);text-align:center;margin:0 0 20px}
+.gate input{width:100%;padding:13px 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg);margin-bottom:12px;outline:0}
+.gate input:focus,.fld input:focus,.fld textarea:focus{border-color:var(--acc)}
+.gate .btn{width:100%;justify-content:center;padding:13px}
+.err{color:var(--bad);min-height:20px;text-align:center;margin-top:10px;font-size:13px}
+/* app shell */
+.app{display:grid;grid-template-rows:56px 1fr;height:100vh}
+.top{display:flex;align-items:center;gap:14px;padding:0 18px;border-bottom:1px solid var(--line);background:var(--panel)}
+.top img{height:32px;width:auto}.top .sp{flex:1}.top .st{color:var(--mut);font-size:13px}.top .st.dirty{color:var(--acc2)}.top .st.ok{color:var(--ok)}
+.body{display:grid;grid-template-columns:210px minmax(0,1fr) minmax(0,.9fr);min-height:0}
+.body.nopreview{grid-template-columns:210px minmax(0,1fr)}
+.side{border-right:1px solid var(--line);background:var(--panel);padding:12px;overflow:auto}
+.side button{display:flex;width:100%;align-items:center;gap:10px;text-align:left;border:0;background:none;padding:10px 12px;border-radius:10px;cursor:pointer;color:var(--mut);font-weight:600}
+.side button:hover{background:var(--panel2);color:var(--tx)}.side button.on{background:rgba(255,91,20,.14);color:var(--acc2)}
+.side hr{border:0;border-top:1px solid var(--line);margin:10px 0}
+.side .badge{margin-left:auto;background:var(--acc);color:#fff;border-radius:99px;padding:0 7px;font-size:11px;line-height:18px}
+.main{overflow:auto;padding:26px 30px 80px;scroll-behavior:smooth}
+.prev{border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0;background:#05060b}
+.prev .pb{display:flex;gap:8px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line);color:var(--mut);font-size:12px}
+.prev iframe{flex:1;border:0;background:#fff;width:100%}
+.prev .pb .sp{flex:1}
+h2.pt{font-size:24px;margin:0 0 4px}.sub{color:var(--mut);margin:0 0 22px}
+.grp{border:1px solid var(--line);background:var(--panel);border-radius:var(--r);margin:0 0 18px;overflow:hidden}
+.grp>.gh{text-transform:capitalize;padding:12px 16px;border-bottom:1px solid var(--line);font-weight:700;display:flex;align-items:center;gap:10px;background:var(--panel2)}
+.grp>.gb{padding:16px;display:grid;gap:14px}
+.fld label{display:block;font-size:12px;font-weight:600;color:var(--mut);margin:0 0 5px;text-transform:capitalize}
+.fld input[type=text],.fld input[type=url],.fld input[type=email],.fld textarea,.fld input[type=password]{width:100%;padding:10px 12px;border-radius:9px;border:1px solid var(--line);background:var(--bg);outline:0;resize:vertical}
+.fld textarea{min-height:84px;line-height:1.5}
+.fld .hint{font-size:11.5px;color:var(--mut);margin-top:4px}
+.fld.img .ibox{display:flex;gap:12px;align-items:center}
+.fld.img .thumb{width:110px;height:72px;border-radius:9px;border:1px solid var(--line);background:#000 center/contain no-repeat;flex:none;position:relative;overflow:hidden}
+.fld.img .thumb.light{background-color:#2a2f42}
+.fld.img .meta{min-width:0;flex:1;display:flex;flex-direction:column;gap:6px}.fld.img .path{font-size:11.5px;color:var(--mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fld.img.up .thumb::after{content:'Uploading…';position:absolute;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.7);font-size:12px}
+.fld.col{display:flex;align-items:center;gap:10px}.fld.col input[type=color]{width:46px;height:36px;border:1px solid var(--line);border-radius:8px;background:none;padding:2px}
+.list{display:grid;gap:10px}
+.item{border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+.item>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:10px 12px;font-weight:600}
+.item>summary::-webkit-details-marker{display:none}
+.item>summary .n{color:var(--mut);font-weight:500;min-width:22px}
+.item>summary .mini{width:38px;height:50px;border-radius:7px;border:1px solid var(--line);background:#0a0c14 center/cover no-repeat;flex:none}
+.item>summary .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item>summary .car{transition:.2s;color:var(--mut)}.item[open]>summary .car{transform:rotate(90deg)}
+.item>.ib{padding:4px 14px 14px;display:grid;gap:14px;border-top:1px solid var(--line);padding-top:14px}
+.row{display:flex;gap:8px;align-items:center}.row .fld{flex:1}
+.row .x{flex:none}
+.tools{display:flex;gap:4px}.tools .btn{padding:3px 9px}
+.add{justify-self:start}
+.toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,20px);background:#1d2232;border:1px solid var(--line);padding:11px 18px;border-radius:99px;opacity:0;transition:.3s;pointer-events:none;z-index:50;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+.toast.show{opacity:1;transform:translate(-50%,0)}.toast.bad{border-color:var(--bad);color:var(--bad)}.toast.good{border-color:var(--ok)}
+.enq{display:grid;gap:12px}
+.eq{border:1px solid var(--line);background:var(--panel);border-radius:var(--r);padding:16px;display:grid;gap:8px}
+.eq.done{opacity:.55}.eq .h{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.eq .h b{font-size:15px}
+.eq .tag{font-size:11px;padding:2px 9px;border-radius:99px;background:rgba(255,91,20,.16);color:var(--acc2)}
+.eq .d{color:var(--mut);font-size:12.5px}.eq p{margin:0;white-space:pre-wrap}.eq .a{display:flex;gap:8px;flex-wrap:wrap}
+.empty{color:var(--mut);padding:40px;text-align:center;border:1px dashed var(--line);border-radius:var(--r)}
+.menu-btn{display:none}
+@media(max-width:1250px){.body{grid-template-columns:200px minmax(0,1fr)}.prev{display:none}}
+@media(max-width:760px){.body{grid-template-columns:1fr}.side{display:none;position:fixed;inset:56px 0 0;z-index:20}.side.open{display:block}.menu-btn{display:inline-flex}.main{padding:18px 14px 80px}.top .st{display:none}}
+
+[hidden]{display:none!important}
+.body.nopreview .prev{display:none}
+.gate .fld{margin:0 0 12px}.gate label{display:block;font-size:12px;color:var(--mut);margin:0 0 4px;font-weight:600}
+.eq .cm{white-space:pre-wrap}
+.notice{background:rgba(255,91,20,.1);border:1px solid rgba(255,91,20,.4);border-radius:12px;padding:14px 16px;margin:0 0 18px;color:#ffc9ad}
+.top img{height:32px;width:auto}.gate img{height:64px;width:auto}
+</style>
+</head>
+<body>
+<div class="gate" id="gate" hidden>
+  <form id="loginForm" autocomplete="on">
+    <img src="/assets/img/logo-light.webp" alt="Fobas" width="257" height="177">
+    <h1>Admin login</h1>
+    <p>Sign in to edit your website.</p>
+    <div id="cfgWarn" class="notice" hidden>Supabase is not connected yet. Add <b>SUPABASE_URL</b> and <b>SUPABASE_ANON_KEY</b> in Vercel &rarr; Settings &rarr; Environment Variables, then redeploy.</div>
+    <input type="email" id="em" placeholder="Email" required autocomplete="username">
+    <input type="password" id="pw" placeholder="Password" required autocomplete="current-password">
+    <button class="btn pri" type="submit">Sign in</button>
+    <div class="err" id="err"></div>
+  </form>
+</div>
+
+<div class="app" id="app" hidden>
+  <div class="top">
+    <button class="btn sm menu-btn" id="menuBtn">Menu</button>
+    <img src="/assets/img/logo-light.webp" alt="Fobas" width="257" height="177">
+    <strong>Website editor</strong>
+    <span class="sp"></span>
+    <span class="st" id="status">All changes saved</span>
+    <a class="btn sm" href="/" target="_blank" rel="noopener">View site ↗</a>
+    <button class="btn pri" id="save">Save changes</button>
+  </div>
+  <div class="body" id="body">
+    <nav class="side" id="side"></nav>
+    <div class="main" id="main"></div>
+    <aside class="prev" id="prev"><div class="pb"><b>Live preview</b><span class="sp"></span><span id="pvName"></span><button class="btn sm" id="pvReload">Reload</button></div><iframe id="frame" title="Preview"></iframe></aside>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+/* ---------- Minimal Supabase client (REST + Auth + Storage, no library needed) ---------- */
+let CFG={url:'',anonKey:''};
+const LS='fobas-admin-session';
+const session={
+  get(){try{return JSON.parse(localStorage.getItem(LS)||'null')}catch(e){return null}},
+  set(s){try{s?localStorage.setItem(LS,JSON.stringify(s)):localStorage.removeItem(LS)}catch(e){}}
+};
+async function authCall(path,body,method='POST',token){
+  const r=await fetch(CFG.url+'/auth/v1/'+path,{method,headers:{apikey:CFG.anonKey,'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},body:JSON.stringify(body)});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(j.error_description||j.msg||j.message||'Request failed');
+  return j;
+}
+const keep=j=>{const s={access:j.access_token,refresh:j.refresh_token,exp:Date.now()+(j.expires_in||3600)*1000-30000,email:(j.user&&j.user.email)||''};session.set(s);return s};
+async function token(){
+  let s=session.get();if(!s)throw new Error('Please log in again.');
+  if(Date.now()>s.exp){try{s=keep(await authCall('token?grant_type=refresh_token',{refresh_token:s.refresh}))}catch(e){session.set(null);location.reload();throw e}}
+  return s.access;
+}
+async function sb(path,{method='GET',body,prefer,raw}={}){
+  const t=await token();
+  const r=await fetch(CFG.url+'/rest/v1/'+path,{method,headers:{apikey:CFG.anonKey,Authorization:'Bearer '+t,'Content-Type':'application/json',...(prefer?{Prefer:prefer}:{})},body:body===undefined?undefined:JSON.stringify(body)});
+  const txt=await r.text();let j=null;try{j=txt?JSON.parse(txt):null}catch(e){}
+  if(!r.ok)throw new Error((j&&(j.message||j.hint))||('Request failed ('+r.status+')'));
+  return j;
+}
+async function uploadImage(file){
+  const bmp=await createImageBitmap(file,{imageOrientation:'from-image'}).catch(()=>{throw new Error('Could not read that image.')});
+  const max=2400,sc=Math.min(1,max/bmp.width),w=Math.round(bmp.width*sc),h=Math.round(bmp.height*sc);
+  const cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').drawImage(bmp,0,0,w,h);
+  let blob=await new Promise(r=>cv.toBlob(r,'image/webp',0.92));let ext='webp',type='image/webp';
+  if(!blob||blob.type!=='image/webp'){blob=await new Promise(r=>cv.toBlob(r,'image/png'));ext='png';type='image/png'}
+  if(blob.size>5*1024*1024)throw new Error('Image is still larger than 5 MB after compression.');
+  const base=(file.name.replace(/\.[^.]+$/,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'image').slice(0,40);
+  const rnd=Array.from(crypto.getRandomValues(new Uint8Array(3))).map(b=>b.toString(16).padStart(2,'0')).join('');
+  const name='uploads/'+base+'-'+rnd+'.'+ext;
+  const t=await token();
+  const r=await fetch(CFG.url+'/storage/v1/object/media/'+name,{method:'POST',headers:{apikey:CFG.anonKey,Authorization:'Bearer '+t,'Content-Type':type,'x-upsert':'false'},body:blob});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(j.message||j.error||'Upload failed');
+  return CFG.url+'/storage/v1/object/public/media/'+name;
+}
+
+/* ---------- UI helpers ---------- */
+let D={},DEFAULT={},dirty=false;
+const $=s=>document.querySelector(s);
+const el=(t,a={},...k)=>{const e=document.createElement(t);for(const[x,v]of Object.entries(a)){if(x==='class')e.className=v;else if(x==='html')e.innerHTML=v;else if(x.startsWith('on'))e[x]=v;else if(v!==false&&v!=null)e.setAttribute(x,v===true?'':v)}k.flat().forEach(c=>c!=null&&e.append(c.nodeType?c:document.createTextNode(c)));return e};
+
+const TABS=[
+ {id:'site',label:'Site & contact info',icon:'⚙',keys:['site','header_cta','nav'],page:'/',desc:'Name, logo, phone, WhatsApp, address, social links, colour and menu.'},
+ {id:'home',label:'Home page',icon:'⌂',keys:['home'],page:'/',desc:'Everything on the home page.'},
+ {id:'about',label:'About page',icon:'ⓘ',keys:['about'],page:'/about',desc:'Story, vision, mission, highlights and certifications.'},
+ {id:'courses',label:'Courses page',icon:'▤',keys:['courses_page','courses'],page:'/courses',desc:'Add, remove or edit courses. Each course opens with its modules on the site.'},
+ {id:'placement',label:'Placement page',icon:'★',keys:['placement_page','recent_placements','partners','certifications'],page:'/placement',desc:'Recently placed photos, hiring partners, certifications and the comments section text.'},
+ {id:'contact',label:'Contact page',icon:'✆',keys:['contact'],page:'/contact',desc:'Form labels, branches and page heading.'},
+ {id:'footer',label:'Footer',icon:'▁',keys:['footer'],page:'/',desc:'Footer text.'},
+ {id:'sep'},
+ {id:'enq',label:'Enquiries',icon:'✉',page:null},
+ {id:'cmt',label:'Comments',icon:'💬',page:null},
+ {id:'acct',label:'Account',icon:'🔒',page:null}
+];
+const TEXTAREA=new Set(['text','short','description','address','hours','message','about','story','vision','mission','success_text','answer','seo_description','seo_keywords','whatsapp_message','intro']);
+const LABELS={map_url:'Google Maps link (opens directions)',points:'Key points',short:'Short description',phone:'Phone number 1',seo_title:'SEO title (shown in Google, ~60 characters)',seo_description:'SEO description (shown in Google, ~155 characters)',seo_keywords:'SEO keywords (comma separated)',faq:'Frequently asked questions',faq_eyebrow:'FAQ small heading',faq_title:'FAQ heading',question:'Question',answer:'Answer',phone2:'Phone number 2 (leave empty to hide)',whatsapp:'WhatsApp number (with country code, digits only)',whatsapp_message:'WhatsApp pre-filled message',map_embed_url:'Google Maps embed URL',map_directions_url:'Directions link',notify_email:'Send enquiries to (email)',accent_color:'Accent colour',logo_light:'Logo for dark backgrounds',logo_dark:'Logo for light backgrounds',placed_at:'Placed at',url:'Link (page or URL)',courses_page:'Courses page',placement_page:'Placement page',header_cta:'Header button',eligibility:'Eligibility',modules:'Modules / syllabus topics'};
+const HINT={title:'Tip: put *asterisks* around a word to show it in the accent colour.',whatsapp:'Example: 918606797539',map_embed_url:'In Google Maps: Share → Embed a map → copy only the src="…" link.',notify_email:'New enquiry emails go here.'};
+LABELS.recent_placements='Recently placed photos';LABELS.students_title='Recently placed section title';
+HINT.recent_placements='NOTE: these photos are controlled in the code (data/content.default.json), so changes made here are ignored by the website.';
+const human=k=>LABELS[k]||String(k).replace(/_/g,' ');
+const isImg=k=>/(^|_)(image|logo|photo|logo_light|logo_dark)$/.test(k)||k==='image';
+
+function touch(){dirty=true;const s=$('#status');s.textContent='Unsaved changes';s.className='st dirty'}
+function toast(m,c=''){const t=$('#toast');t.textContent=m;t.className='toast show '+c;clearTimeout(t._t);t._t=setTimeout(()=>t.className='toast',2600)}
+const blank=v=>Array.isArray(v)?[]:(v&&typeof v==='object')?Object.fromEntries(Object.entries(v).map(([k,x])=>[k,blank(x)])):'';
+
+/* ---------- Generic field renderers ---------- */
+function field(obj,key,label){
+  const v=obj[key];
+  if(typeof v==='string'||typeof v==='number'||v==null){
+    const s=v==null?'':String(v);
+    if(isImg(key))return imageField(obj,key,label);
+    if(key==='accent_color')return colorField(obj,key,label);
+    const area=TEXTAREA.has(key)||s.includes('\n')||s.length>90;
+    const inp=area?el('textarea',{rows:Math.min(8,Math.max(3,Math.ceil(s.length/70)))}):el('input',{type:key.includes('email')?'email':'text'});
+    inp.value=s;inp.oninput=()=>{obj[key]=inp.value;touch()};
+    return el('div',{class:'fld'},el('label',{},label||human(key)),inp,HINT[key]?el('div',{class:'hint'},HINT[key]):null);
+  }
+  if(Array.isArray(v))return listField(obj,key,label);
+  return group(v,label||human(key));
+}
+function colorField(obj,key,label){
+  const c=el('input',{type:'color'});c.value=/^#[0-9a-f]{6}$/i.test(obj[key])?obj[key]:'#ff5b14';
+  const t=el('input',{type:'text'});t.value=c.value;t.style.maxWidth='120px';
+  c.oninput=()=>{t.value=c.value;obj[key]=c.value;touch()};t.oninput=()=>{obj[key]=t.value;if(/^#[0-9a-f]{6}$/i.test(t.value))c.value=t.value;touch()};
+  return el('div',{class:'fld'},el('label',{},label||human(key)),el('div',{class:'col fld'},c,t));
+}
+function imgSrc(p){return !p?'':/^https?:\/\//i.test(p)?p:'/'+p.replace(/^\/+/,'')}
+function imageField(obj,key,label){
+  const wrap=el('div',{class:'fld img'});
+  const thumb=el('div',{class:'thumb'+(key==='logo_light'?' light':'')});
+  const path=el('div',{class:'path'});
+  const paint=()=>{const p=obj[key]||'';thumb.style.backgroundImage=p?`url("${imgSrc(p).replace(/"/g,'')}")`:'none';path.textContent=p?(p.split('/').pop()):'No image'};
+  const file=el('input',{type:'file',accept:'image/png,image/jpeg,image/webp',hidden:true});
+  file.onchange=async()=>{
+    if(!file.files[0])return;wrap.classList.add('up');
+    try{const url=await uploadImage(file.files[0]);obj[key]=url;paint();touch();wrap.dispatchEvent(new Event('input',{bubbles:true}));toast('Image uploaded. Remember to save.','good')}
+    catch(e){toast(e.message||'Upload failed','bad')}
+    wrap.classList.remove('up');file.value='';
+  };
+  paint();
+  wrap.append(el('label',{},label||human(key)),el('div',{class:'ibox'},thumb,el('div',{class:'meta'},path,el('div',{class:'row'},el('button',{class:'btn sm',type:'button',onclick:()=>file.click()},'Replace image…'),file))));
+  return wrap;
+}
+function title(it,i){
+  if(typeof it==='string')return it||'(empty)';
+  for(const k of['title','name','label','tag']){if(typeof it[k]==='string'&&it[k])return it[k].replace(/\*/g,'')}
+  const f=Object.values(it).find(x=>typeof x==='string'&&x);
+  if(!f||/\.(webp|jpe?g|png)(\?|$)/i.test(f))return (it.image!==undefined||it.photo!==undefined)?'Photo '+(i+1):'Item '+(i+1);   // image-only items are called Photo 1, Photo 2 ...
+  return f.slice(0,60);
+}
+function listField(obj,key,label){
+  const arr=obj[key];const box=el('div',{class:'list'});
+  const wrap=el('div',{class:'fld'},el('label',{},label||human(key)),HINT[key]?el('div',{class:'hint'},HINT[key]):null,box);
+  const strings=!arr.length||typeof arr[0]==='string';
+  const tpl=arr.length?blank(arr[0]):(key==='modules'||key==='marquee'||key.endsWith('items')?'':{});
+  function draw(){
+    box.innerHTML='';
+    arr.forEach((it,i)=>{
+      const mv=(d)=>()=>{const j=i+d;if(j<0||j>=arr.length)return;[arr[i],arr[j]]=[arr[j],arr[i]];touch();draw()};
+      const tools=el('div',{class:'tools'},el('button',{class:'btn sm',type:'button',title:'Move up',onclick:e=>{e.preventDefault();mv(-1)()}},'↑'),el('button',{class:'btn sm',type:'button',title:'Move down',onclick:e=>{e.preventDefault();mv(1)()}},'↓'),
+        el('button',{class:'btn sm bad',type:'button',title:'Remove',onclick:e=>{e.preventDefault();if(confirm('Remove this item?')){arr.splice(i,1);touch();draw()}}},'✕'));
+      if(typeof it==='string'){
+        const inp=el('input',{type:'text'});inp.value=it;inp.oninput=()=>{arr[i]=inp.value;touch()};
+        box.append(el('div',{class:'row'},el('div',{class:'fld'},inp),tools));
+      }else{
+        const d=el('details',{class:'item'});
+        const t=el('span',{class:'t'},title(it,i));
+        const pk=it.image!==undefined?'image':it.photo!==undefined?'photo':null;   // small preview picture for photo items
+        const mini=pk?el('span',{class:'mini'}):null;
+        const paintMini=()=>{if(mini)mini.style.backgroundImage=it[pk]?`url("${imgSrc(it[pk]).replace(/"/g,'')}")`:'none'};paintMini();
+        d.append(el('summary',{},el('span',{class:'n'},String(i+1).padStart(2,'0')),mini,t,tools,el('span',{class:'car'},'›')));
+        const ib=el('div',{class:'ib'});
+        Object.keys(it).forEach(k=>ib.append(field(it,k,(key==='recent_placements'&&k==='image')?'Photo (portrait, about 1080 x 1440 px)':undefined)));
+        ib.addEventListener('input',()=>{t.textContent=title(it,i);if(typeof paintMini==='function')paintMini()});
+        d.append(ib);box.append(d);
+        if(arr.length<=1)d.open=true;
+      }
+    });
+    box.append(el('button',{class:'btn sm add',type:'button',onclick:()=>{arr.push(typeof tpl==='object'?JSON.parse(JSON.stringify(tpl)):'');touch();draw();const last=box.querySelectorAll('details.item');if(last.length)last[last.length-1].open=true}},'+ Add item'));
+  }
+  draw();return wrap;
+}
+function group(o,label){
+  const gb=el('div',{class:'gb'});
+  Object.keys(o).forEach(k=>gb.append(field(o,k)));
+  return el('div',{class:'grp'},el('div',{class:'gh'},label),gb);
+}
+
+
+/* ---------- Tabs / pages ---------- */
+let cur='site',badges={enq:0,cmt:0};
+function renderSide(){
+  const s=$('#side');s.innerHTML='';
+  TABS.forEach(t=>{
+    if(t.id==='sep'){s.append(el('hr'));return}
+    s.append(el('button',{class:t.id===cur?'on':'',onclick:()=>{go(t.id);s.classList.remove('open')}},el('span',{},t.icon),t.label,badges[t.id]?el('span',{class:'badge'},String(badges[t.id])):null));
+  });
+}
+function go(id){
+  cur=id;const t=TABS.find(x=>x.id===id);renderSide();
+  const m=$('#main');m.innerHTML='';m.scrollTop=0;
+  $('#body').classList.toggle('nopreview',!t.page);
+  if(t.page)preview(t.page);
+  m.append(el('h2',{class:'pt'},t.label));
+  if(id==='enq')return enquiries(m);
+  if(id==='cmt')return comments(m);
+  if(id==='acct')return account(m);
+  m.append(el('p',{class:'sub'},t.desc));
+  t.keys.forEach(k=>{if(D[k]===undefined)return;const f=field(D,k,human(k));m.append(f.classList&&f.classList.contains('fld')?el('div',{class:'grp'},el('div',{class:'gb'},f)):f)});
+}
+function preview(p){$('#frame').src=p+(p.includes('?')?'&':'?')+'preview='+Date.now();$('#pvName').textContent=p}
+$('#pvReload').onclick=()=>preview((TABS.find(x=>x.id===cur)||{}).page||'/');
+
+/* ---------- Save ---------- */
+async function save(){
+  const b=$('#save');b.disabled=true;b.textContent='Saving…';
+  try{
+    await sb('site_content?on_conflict=id',{method:'POST',body:{id:1,data:D},prefer:'resolution=merge-duplicates,return=minimal'});
+    dirty=false;const s=$('#status');s.textContent='Saved at '+new Date().toLocaleTimeString();s.className='st ok';
+    toast('Saved. Your website updates within a few seconds.','good');
+    const t=TABS.find(x=>x.id===cur);if(t&&t.page)preview(t.page);
+  }catch(e){toast(e.message||'Save failed','bad')}
+  b.disabled=false;b.textContent='Save changes';
+}
+$('#save').onclick=save;
+addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='s'&&!$('#app').hidden){e.preventDefault();save()}});
+addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue=''}});
+$('#menuBtn').onclick=()=>$('#side').classList.toggle('open');
+
+/* ---------- Enquiries ---------- */
+async function enquiries(m){
+  let rows;try{rows=await sb('enquiries?select=*&order=created_at.desc')}catch(e){m.append(el('div',{class:'empty'},e.message));return}
+  badges.enq=rows.filter(r=>r.status!=='done').length;renderSide();
+  m.append(el('p',{class:'sub'},'Messages sent through the contact form.'));
+  if(!rows.length){m.append(el('div',{class:'empty'},'No enquiries yet.'));return}
+  const csv=el('button',{class:'btn sm',style:'margin-bottom:14px',onclick:()=>{
+    const q=v=>{let t=String(v??'');if(/^[=+\-@\t\r]/.test(t))t="'"+t;return '"'+t.replace(/"/g,'""')+'"'};   // a leading ' stops Excel running visitor text as a formula
+    const t=['Date,Name,Phone,Email,Course,Message,Status'].concat(rows.map(r=>[r.created_at,r.name,r.phone,r.email,r.course,r.message,r.status].map(q).join(','))).join('\n');
+    const a=el('a',{href:URL.createObjectURL(new Blob([t],{type:'text/csv'})),download:'enquiries.csv'});a.click()}},'Download CSV');
+  const list=el('div',{class:'enq'});m.append(csv,list);
+  rows.forEach(r=>{
+    const digits=String(r.phone).replace(/\D/g,'').replace(/^(\d{10})$/,'91$1');
+    list.append(el('div',{class:'eq'+(r.status==='done'?' done':'')},
+      el('div',{class:'h'},el('b',{},r.name),r.course?el('span',{class:'tag'},r.course):null,r.status==='done'?el('span',{class:'d'},'✓ handled'):null),
+      el('div',{class:'d'},new Date(r.created_at).toLocaleString()),
+      r.message?el('p',{class:'cm'},r.message):null,
+      el('div',{class:'a'},el('a',{class:'btn sm',href:'tel:'+r.phone},'Call '+r.phone),el('a',{class:'btn sm',href:'mailto:'+r.email},r.email),
+        el('a',{class:'btn sm',target:'_blank',rel:'noopener',href:'https://wa.me/'+digits},'WhatsApp'),
+        el('button',{class:'btn sm',onclick:async()=>{await sb('enquiries?id=eq.'+r.id,{method:'PATCH',body:{status:r.status==='done'?'new':'done'},prefer:'return=minimal'});go('enq')}},r.status==='done'?'Mark as new':'Mark handled'),
+        el('button',{class:'btn sm bad',onclick:async()=>{if(confirm('Delete this enquiry?')){await sb('enquiries?id=eq.'+r.id,{method:'DELETE',prefer:'return=minimal'});go('enq')}}},'Delete'))));
+  });
+}
+
+/* ---------- Comments (moderation) ---------- */
+async function comments(m){
+  let rows;try{rows=await sb('comments?select=*&order=created_at.desc')}catch(e){m.append(el('div',{class:'empty'},e.message));return}
+  badges.cmt=rows.filter(r=>!r.approved).length;renderSide();
+  m.append(el('p',{class:'sub'},'Visitor comments appear on the Placement page only after you approve them.'));
+  if(!rows.length){m.append(el('div',{class:'empty'},'No comments yet.'));return}
+  const list=el('div',{class:'enq'});m.append(list);
+  rows.forEach(r=>list.append(el('div',{class:'eq'+(r.approved?'':' pending')},
+    el('div',{class:'h'},el('b',{},r.name),el('span',{class:'tag'},r.approved?'Published':'Waiting for approval')),
+    el('div',{class:'d'},new Date(r.created_at).toLocaleString()),
+    el('p',{class:'cm'},r.message),
+    el('div',{class:'a'},
+      el('button',{class:'btn sm '+(r.approved?'':'pri'),onclick:async()=>{await sb('comments?id=eq.'+r.id,{method:'PATCH',body:{approved:!r.approved},prefer:'return=minimal'});go('cmt')}},r.approved?'Hide':'Approve & publish'),
+      el('button',{class:'btn sm bad',onclick:async()=>{if(confirm('Delete this comment?')){await sb('comments?id=eq.'+r.id,{method:'DELETE',prefer:'return=minimal'});go('cmt')}}},'Delete')))));
+}
+
+/* ---------- Account ---------- */
+function account(m){
+  const s=session.get()||{};
+  m.append(el('p',{class:'sub'},'Signed in as '+(s.email||'admin')+'.'));
+  const nw=el('input',{type:'password',autocomplete:'new-password'});
+  m.append(el('div',{class:'grp'},el('div',{class:'gh'},'Change password'),el('div',{class:'gb'},el('div',{class:'fld'},el('label',{},'New password (8+ characters)'),nw),
+    el('button',{class:'btn pri',style:'justify-self:start',onclick:async()=>{
+      if(nw.value.length<8){toast('Use at least 8 characters','bad');return}
+      try{await authCall('user',{password:nw.value},'PUT',await token());toast('Password changed','good');nw.value=''}catch(e){toast(e.message,'bad')}}},'Change password'))),
+   el('div',{class:'grp'},el('div',{class:'gb'},el('button',{class:'btn',style:'justify-self:start',onclick:()=>{session.set(null);location.reload()}},'Log out'))));
+}
+
+/* ---------- Boot ---------- */
+const merge=(b,o)=>{const isO=v=>v&&typeof v==='object'&&!Array.isArray(v);if(!isO(b)||!isO(o))return o===undefined?b:o;const out={...b};for(const k of Object.keys(o))out[k]=k in b?merge(b[k],o[k]):o[k];return out};
+async function startApp(){
+  $('#gate').hidden=true;$('#app').hidden=false;
+  try{DEFAULT=await (await fetch('/api/defaults',{cache:'no-store'})).json()}   // the real data/content.default.json, so the admin never drifts from the code
+  catch(e){DEFAULT=await (await fetch('/content.default.json')).json()}
+  let saved={};
+  try{const rows=await sb('site_content?id=eq.1&select=data');saved=(rows&&rows[0]&&rows[0].data)||{}}catch(e){toast('Could not load saved content: '+e.message,'bad')}
+  D=Object.keys(saved).length?merge(DEFAULT,saved):JSON.parse(JSON.stringify(DEFAULT));
+  if(DEFAULT.recent_placements)D.recent_placements=JSON.parse(JSON.stringify(DEFAULT.recent_placements));   // the website uses the code list, so the admin shows exactly that list
+  delete D.students;   // old placed-students list is no longer used; it disappears from the database on the next Save
+  if(D.placement_page)delete D.placement_page.placed_label;   // the "Placed at" label belonged to the old student cards
+  renderSide();go('site');
+  sb('enquiries?select=status&status=eq.new').then(r=>{badges.enq=r.length;renderSide()}).catch(()=>{});
+  sb('comments?select=id&approved=eq.false').then(r=>{badges.cmt=r.length;renderSide()}).catch(()=>{});
+}
+(async()=>{
+  try{CFG=await (await fetch('/api/config')).json()}catch(e){}
+  if(!CFG.url||!CFG.anonKey){$('#gate').hidden=false;$('#cfgWarn').hidden=false;return}
+  if(session.get()){try{await token();return startApp()}catch(e){session.set(null)}}
+  $('#gate').hidden=false;
+})();
+$('#loginForm').addEventListener('submit',async e=>{
+  e.preventDefault();const err=$('#err');err.textContent='';
+  if(!CFG.url){err.textContent='Supabase is not connected yet.';return}
+  try{keep(await authCall('token?grant_type=password',{email:$('#em').value.trim(),password:$('#pw').value}));startApp()}
+  catch(x){err.textContent=/invalid/i.test(x.message)?'Wrong email or password.':x.message}
+});
+</script>
+</body>
+</html>

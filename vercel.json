@@ -61,6 +61,56 @@
       "source": "/contact.php",
       "destination": "/contact",
       "permanent": true
+    },
+    {
+      "source": "/:slug(about-.+)",
+      "destination": "/about",
+      "permanent": true
+    },
+    {
+      "source": "/:slug(contact-.+)",
+      "destination": "/contact",
+      "permanent": true
+    },
+    {
+      "source": "/:slug(placement-.+|placements|placed-.+|alumni.*)",
+      "destination": "/placement",
+      "permanent": true
+    },
+    {
+      "source": "/:slug(x-ray.*|xray.*|.*welding.*|.*logistics.*|diploma.*|focused.*|.*oil.*gas.*|.*safety.*|.*hospital.*|.*ndt.*|.*pipeline.*|.*qa-?qc.*|course-.+)",
+      "destination": "/courses",
+      "permanent": true
+    },
+    {
+      "source": "/course/:path*",
+      "destination": "/courses",
+      "permanent": true
+    },
+    {
+      "source": "/courses/:path+",
+      "destination": "/courses",
+      "permanent": true
+    },
+    {
+      "source": "/home",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/category/:path*",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/tag/:path*",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/blog/:path*",
+      "destination": "/",
+      "permanent": true
     }
   ],
   "headers": [

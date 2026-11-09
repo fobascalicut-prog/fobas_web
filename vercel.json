@@ -63,6 +63,11 @@
       "permanent": true
     },
     {
+      "source": "/about-oil-and-gas-training-institute",
+      "destination": "/",
+      "permanent": true
+    },
+    {
       "source": "/:slug(about-.+)",
       "destination": "/about",
       "permanent": true

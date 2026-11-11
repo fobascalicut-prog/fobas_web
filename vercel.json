@@ -83,7 +83,7 @@
       "permanent": true
     },
     {
-      "source": "/:slug(x-ray.*|xray.*|.*welding.*|.*logistics.*|diploma.*|focused.*|.*oil.*gas.*|.*safety.*|.*hospital.*|.*ndt.*|.*pipeline.*|.*qa-?qc.*|course-.+)",
+      "source": "/:slug((?!assets$)(?:x-ray|xray|diploma|focused|course-)[^/]*|[^/]*(?:welding|logistics|oil[^/]*gas|safety|hospital|ndt|pipeline|qa-?qc)[^/]*)",
       "destination": "/courses",
       "permanent": true
     },

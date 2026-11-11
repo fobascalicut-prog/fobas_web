@@ -170,7 +170,7 @@
         },
         {
           "key": "Permissions-Policy",
-          "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()"
+          "value": "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
         },
         {
           "key": "Cross-Origin-Opener-Policy",

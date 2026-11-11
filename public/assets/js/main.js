@@ -294,7 +294,7 @@
     if (!items().length) return;                                              // only pages that have posters
     const lb = document.createElement('div');
     lb.className = 'lb'; lb.setAttribute('role', 'dialog'); lb.setAttribute('aria-modal', 'true'); lb.setAttribute('aria-hidden', 'true');
-    lb.innerHTML = '<button class="lb-x" type="button" aria-label="Close">&times;</button><button class="lb-nav lb-prev" type="button" aria-label="Previous">&#8249;</button><img alt=""><button class="lb-nav lb-next" type="button" aria-label="Next">&#8250;</button>';
+    lb.innerHTML = '<button class="lb-x" type="button" aria-label="Close">&times;</button><button class="lb-nav lb-prev" type="button" aria-label="Previous">&#8249;</button><img alt="Enlarged image"><button class="lb-nav lb-next" type="button" aria-label="Next">&#8250;</button>';
     document.body.appendChild(lb);
     const big = $('img', lb); let cur = 0;
     const show = n => { const l = items(); cur = (n + l.length) % l.length; big.src = l[cur].dataset.lightbox; big.alt = ($('img', l[cur]) || {}).alt || ''; };
